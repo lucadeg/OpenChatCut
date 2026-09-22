@@ -1,3 +1,4 @@
+
 # Does the Windows whisper-cli we ship actually run?
 #
 # scripts/sync-whisper-cli.mjs downloads the official whisper.cpp archive and
@@ -15,13 +16,7 @@ name: Windows whisper runtime
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - '.github/workflows/windows-whisper-runtime.yml'
-      - 'scripts/sync-whisper-cli.mjs'
-      - 'server/media-binaries.ts'
-      - 'desktop/native-asr-worker.ts'
-
+  # Automatic triggers removed; invoke through FounderOS/Admin Gate.
 permissions:
   contents: read
 

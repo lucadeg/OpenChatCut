@@ -1,29 +1,9 @@
+
 name: Windows MCP recovery
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - '.github/workflows/windows-mcp-recovery.yml'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'server/external-agent/**'
-      - 'server/plugins/project-store*.ts'
-      - 'src/agent/external-run-ledger.ts'
-      - 'src/agent/runtime-ledger.ts'
-      - 'src/persist/agentRuntimeStore.ts'
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/windows-mcp-recovery.yml'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'server/external-agent/**'
-      - 'server/plugins/project-store*.ts'
-      - 'src/agent/external-run-ledger.ts'
-      - 'src/agent/runtime-ledger.ts'
-      - 'src/persist/agentRuntimeStore.ts'
-
+  # Automatic triggers removed; invoke through FounderOS/Admin Gate.
 permissions:
   contents: read
 

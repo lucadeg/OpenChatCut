@@ -1,37 +1,9 @@
+
 name: Windows model persistence
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - '.github/workflows/desktop.yml'
-      - '.github/workflows/windows-model-persistence.yml'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'desktop/main.ts'
-      - 'server/plugins/asr-models.ts'
-      - 'server/plugins/hf-proxy.ts'
-      - 'server/plugins/model-packs.ts'
-      - 'server/plugins/model-persistence-restart.verify.ts'
-      - 'shared/asr-models.ts'
-      - 'shared/model-cache-path.ts'
-      - 'shared/model-packs/**'
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/desktop.yml'
-      - '.github/workflows/windows-model-persistence.yml'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'desktop/main.ts'
-      - 'server/plugins/asr-models.ts'
-      - 'server/plugins/hf-proxy.ts'
-      - 'server/plugins/model-packs.ts'
-      - 'server/plugins/model-persistence-restart.verify.ts'
-      - 'shared/asr-models.ts'
-      - 'shared/model-cache-path.ts'
-      - 'shared/model-packs/**'
-
+  # Automatic triggers removed; invoke through FounderOS/Admin Gate.
 permissions:
   contents: read
 

@@ -1,3 +1,4 @@
+
 # Verification CI: lint, tests, the agent-skill contract, and the production
 # build. Runs on pull requests and when a v* tag is pushed (release time, where
 # it also validates the tag against package.json). Ordinary branch pushes stay
@@ -10,12 +11,9 @@
 name: ci
 
 on:
-  push:
-    tags:
-      - 'v*'
-  pull_request:
   workflow_dispatch:
 
+  # Automatic triggers removed; invoke through FounderOS/Admin Gate.
 permissions:
   contents: read
 
