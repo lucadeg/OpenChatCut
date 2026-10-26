@@ -27,7 +27,7 @@ import * as remotionRender from '../../remotion/render.mjs';
 
 export const {
   currentRenderConcurrency,
-  remotionFfmpegPath,
+  remotionHardwareFfmpegPath,
   renderTimeline,
   renderTimelineStills,
   renderClip,
@@ -48,7 +48,7 @@ export async function cleanupExportOutputs(paths: Array<string | null>): Promise
 
 export async function h264RenderOptions(codec: string) {
   return codec === 'h264'
-    ? resolveH264RenderOptions(ffmpegBin(), remotionFfmpegPath())
+    ? resolveH264RenderOptions(ffmpegBin(), remotionHardwareFfmpegPath())
     : {};
 }
 
@@ -91,6 +91,7 @@ export async function renderExportPlan(
         plan.retimeFps,
         plan.media.codec as 'h264' | 'vp8',
         plan.videoBitrate ?? resolveH264TargetBitrate({ ...outputSize, fps: plan.retimeFps }),
+        outputSize,
         signal,
       ));
       signal?.throwIfAborted();
@@ -125,6 +126,6 @@ export async function renderExportPlan(
 }
 
 export async function exportCapabilities() {
-  const { h264Profile } = await resolveH264RenderOptions(ffmpegBin(), remotionFfmpegPath());
+  const { h264Profile } = await resolveH264RenderOptions(ffmpegBin(), remotionHardwareFfmpegPath());
   return { h264: h264Profile, renderConcurrency: currentRenderConcurrency() };
 }

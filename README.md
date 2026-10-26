@@ -18,6 +18,10 @@
 </p>
 
 <p align="center">
+  <a href="https://openchatcut.com/pro"><strong>OpenChatCut Pro</strong></a> · Desktop edition: install it and start cutting
+</p>
+
+<p align="center">
   <a href="#what-is-openchatcut">Introduction</a> ·
   <a href="#product-tour">Product Tour</a> ·
   <a href="#quick-start">Quick Start</a> ·
@@ -39,6 +43,7 @@
   <img alt="Remotion" src="https://img.shields.io/badge/Remotion-4-0B84F3?style=flat" />
   <img alt="Electron" src="https://img.shields.io/badge/Electron-43-47848F?style=flat&logo=electron&logoColor=white" />
   <img alt="MCP" src="https://img.shields.io/badge/MCP-Agent_native-7C3AED?style=flat" />
+  <a href="https://atomgit.com/Oxsline/openchatcut"><img alt="AtomGit G-Star" src="https://img.shields.io/badge/AtomGit-G--Star-DA203E?logo=gitcode&logoColor=white" /></a>
 </p>
 
 <p align="center">
@@ -196,6 +201,7 @@ Describe the goal → Agent reads the project → Produces verifiable edits → 
 | AI generation | Image, video, speech, music, and sound-effect jobs with progress tracking |
 | Media | Uploads, folders, online image/video/audio search, and Firecrawl visual-media fallback |
 | Export | MP4, audio, captions, FCPXML, project import/export, export history, hardware-aware H.264 acceleration, and resource-aware export queueing |
+| Publishing | Agent-driven publishing of finished renders to TikTok, Instagram, YouTube, LinkedIn, Facebook, X, Threads, Pinterest, and Bluesky via Upload-Post, with a preview and explicit confirmation first |
 | Agent | Built-in conversational agent, skills, proposal-based edits, and external Streamable HTTP MCP |
 
 ---
@@ -257,6 +263,8 @@ These are early builds. The macOS packages are not yet signed or notarized, so t
 
 Requires Node.js 24.x and npm. The supported Node.js range is enforced by `package.json`, and `.nvmrc` selects the matching major version for Node version managers.
 
+On Linux x64, `npm install` also downloads ONNX Runtime's optional CUDA provider (several hundred MB from NuGet). For a CPU-only install, run `ONNXRUNTIME_NODE_INSTALL=skip npm install` instead.
+
 ```bash
 git clone https://github.com/0xsline/OpenChatCut.git
 cd OpenChatCut
@@ -270,6 +278,8 @@ Open:
 ```text
 http://localhost:5199
 ```
+
+The editor needs a browser [secure context](https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Secure_Contexts): open OpenChatCut at `http://localhost` or `http://127.0.0.1` on the machine running it, or serve it over HTTPS. Over plain HTTP from another device (a LAN IP or reverse proxy), browsers disable Web Crypto, WebCodecs, and the clipboard, so the project list still loads but the editor shows this requirement instead of opening.
 
 Only add the model or media-service credentials you actually use to `.env.local`. Features without configured third-party credentials report the missing key explicitly; local timeline editing, built-in media, and other configured capabilities continue to work.
 
@@ -289,12 +299,14 @@ The built-in Agent always runs the model loop on the local server. Chat, drafts,
 
 ### Agent local-path access (advanced)
 
-Desktop agents can browse any local directory allowed by the operating system by default, including mounted media drives. `browse_local_media` lists folders and supported media, searches by filename or relative path and media type, and returns paginated results without importing. The agent can then use `import_assets` for up to 100 selected paths, `import_asset` for one path, or `import_folder` for a whole folder. Imports reuse media probing and reference registration, preserve source files, and skip duplicate content, including duplicates within one batch. Document files such as TXT, Markdown, DOCX, and PDF should be attached to chat instead. These tools require the desktop app.
+Desktop agents can browse any local directory allowed by the operating system by default, including mounted media drives. `browse_local_media` lists folders and supported media, searches by filename or relative path and media type, and returns paginated results without importing. The agent can then use `import_assets` for up to 100 selected paths, `import_asset` for one path, or `import_folder` for a whole folder. Imports reuse media probing and reference registration, preserve source files, and skip duplicate content, including duplicates within one batch. Document files such as TXT, Markdown, DOCX, and PDF should be attached to chat instead. In the desktop app these tools are enabled by default; in a browser session they also work, but only for directories listed in `AGENT_IMPORT_ROOTS` and while the editor is served from the same machine that runs OpenChatCut.
 
-To restrict local access, set a comma-separated value such as `AGENT_IMPORT_ROOTS=/Volumes/Media,D:\Projects` in `.env.local`; leave it empty for default unrestricted directory access. Explicit restrictions apply to both browsing and import. Source checkouts read the repository file at startup. Packaged desktop builds read it from Electron's user-data directory: `~/Library/Application Support/OpenChatCut/` on macOS, `%APPDATA%\OpenChatCut\` on Windows, and `$XDG_CONFIG_HOME/OpenChatCut/` (normally `~/.config/OpenChatCut/`) on Linux. Restart after editing the file.
+To restrict local access, set a comma-separated value such as `AGENT_IMPORT_ROOTS=/Volumes/Media,D:\Projects` in `.env.local`; leave it empty for default unrestricted directory access in the desktop app (a browser session requires the allowlist and refuses these tools while it is empty). Explicit restrictions apply to both browsing and import. Source checkouts read the repository file at startup. Packaged desktop builds read it from Electron's user-data directory: `~/Library/Application Support/OpenChatCut/` on macOS, `%APPDATA%\OpenChatCut\` on Windows, and `$XDG_CONFIG_HOME/OpenChatCut/` (normally `~/.config/OpenChatCut/`) on Linux. Restart after editing the file.
 
 
 Local H.264 exports automatically prefer VideoToolbox on macOS and NVENC on compatible Windows systems, then fall back to software encoding. Tune render concurrency and the heavy-export limit with `OPENCHATCUT_RENDER_CONCURRENCY` and `OPENCHATCUT_MAX_ACTIVE_EXPORTS`, disable hardware encoding with `OPENCHATCUT_DISABLE_HARDWARE_ENCODING`, or override FFmpeg-side encoder selection with `OPENCHATCUT_H264_ENCODER`; see [`.env.example`](.env.example).
+
+On Apple Silicon, more render workers can slow down video-heavy exports even when VideoToolbox encoding is active. See [macOS render tuning](MACOS-RENDER-TUNING.md) for an M4 Max benchmark and a way to test your own workload. These measurements do not establish a default for other Macs or Windows.
 
 ### Desktop development
 
@@ -385,6 +397,50 @@ approve it in OpenChatCut before reporting that the edit was applied.
 
 External agents invoke the same internal editing tools and `EditorCore` commands as the editor itself. There are no separate project formats that can drift apart, and the live timeline is not changed while an external draft is being prepared.
 
+### Qoder
+
+Qoder is one-click too: the guide's **Connect** button writes the endpoint and
+bearer token into Qoder's own settings file, keeping any unrelated settings and
+MCP servers already there.
+
+```text
+~/.qoder/settings.json        (international build)
+~/.qoder-cn/settings.json     (China build — written as well when installed)
+```
+
+```json
+{
+  "mcpServers": {
+    "openchatcut": {
+      "type": "http",
+      "url": "http://localhost:5199/api/external-mcp/mcp",
+      "headers": { "Authorization": "Bearer <token>" }
+    }
+  }
+}
+```
+
+Restart Qoder afterwards to load the server.
+
+### Qwen Work (千问办公)
+
+千问办公 keeps custom MCP servers inside its own connector store rather than a
+config file, so OpenChatCut cannot write this one for you. In the guide, use
+**Copy config** on the 千问办公 card, then in 千问办公 open
+连接器 → 自定义 MCP → 添加, paste the JSON, and save:
+
+```json
+{
+  "mcpServers": {
+    "openchatcut": {
+      "type": "streamable-http",
+      "url": "http://localhost:5199/api/external-mcp/mcp",
+      "headers": { "Authorization": "Bearer <token>" }
+    }
+  }
+}
+```
+
 ### Protecting MCP access
 
 When exposing the MCP endpoint yourself, configure:
@@ -412,7 +468,7 @@ Clients must send `Authorization: Bearer <token>`. The current bridge is designe
 |---|---|
 | Frontend | React 19, TypeScript 6, Vite 8 |
 | Editing core | Immutable timeline state, command layer, and proposal-based application |
-| Agent | Vercel AI SDK 7 (Anthropic, OpenAI, Gemini, Kimi, Qwen, GLM, DeepSeek, MiniMax, Xiaomi MiMo, Mistral, xAI Grok by API key or SuperGrok/X Premium+ subscription sign-in, OpenRouter, OrcaRouter, OFox, and compatible APIs), Agent Skills, MCP SDK |
+| Agent | Vercel AI SDK 7 (Anthropic, OpenAI, Gemini, Kimi, Qwen, GLM, DeepSeek, MiniMax, Xiaomi MiMo, Mistral, xAI Grok by API key or SuperGrok/X Premium+ subscription sign-in, OpenRouter, OrcaRouter, OFox, Requesty, Cheaper Inference, and compatible APIs), Agent Skills, MCP SDK |
 | Preview and visuals | Remotion Player, WebGL / GLSL |
 | Server | Dual-host Vite / Electron plugins and a server-side keystore |
 | Persistence | Shared local project store under `~/.openchatcut`, IndexedDB cache, configurable local media directory, optional Cloudflare R2 |
@@ -458,6 +514,13 @@ Clients must send `Authorization: Bearer <token>`. The current bridge is designe
 
 ---
 
+### Fal.ai image and video generation
+
+Fal.ai is an optional generation provider with an explicit image/video model catalog.
+Configure it under **Settings → AI Generation → Image or Video → Fal.ai**.
+See [Fal setup, supported models, and extension guide](FAL.md) for supported modes,
+server-only credentials, and checks that do not spend generation credits.
+
 ## Development and Verification
 
 ```bash
@@ -493,6 +556,8 @@ OpenChatCut is built with the following core projects and specifications:
 | [Model Context Protocol](https://modelcontextprotocol.io/) | Protocol foundation that enables Codex, Claude Code, and other external agents to access projects and timeline tools. |
 | [Vercel AI SDK](https://ai-sdk.dev/) | Provider-neutral model streaming and tool calling for the built-in Agent. |
 | [tt-a1i/archify](https://github.com/tt-a1i/archify) | Tool used to define, validate, and generate the README's runtime architecture diagram. |
+
+JianYing / CapCut draft export is powered by [capcut-cli](https://github.com/renezander030/capcut-cli).
 
 This list covers the project's major technical foundations. It does not replace the licenses bundled with individual dependencies, fonts, or binaries. See `package-lock.json` for JavaScript dependency versions and [`assets/fonts/LICENSES.md`](assets/fonts/LICENSES.md) for font licenses.
 
